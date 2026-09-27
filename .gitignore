@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# Packaged mod zips
+dist/
+
+# IDE / editor
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS cruft
+.DS_Store
+Thumbs.db

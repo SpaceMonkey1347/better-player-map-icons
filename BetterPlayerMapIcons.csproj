@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AssemblyName>BetterPlayerMapIcons</AssemblyName>
+    <RootNamespace>BetterPlayerMapIcons</RootNamespace>
+    <!-- Path to your Vintage Story install. Set the VINTAGE_STORY env var, or edit this. -->
+    <GamePath>$(VINTAGE_STORY)</GamePath>
+    <!-- Used to name the distributable zip: <ModId>_<ModVersion>.zip -->
+    <ModId>betterplayermapicons</ModId>
+    <ModVersion>1.0.0</ModVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="VintagestoryAPI">
+      <HintPath>$(GamePath)/VintagestoryAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="VintagestoryLib">
+      <HintPath>$(GamePath)/VintagestoryLib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="VSEssentials">
+      <HintPath>$(GamePath)/Mods/VSEssentials.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(GamePath)/Lib/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(GamePath)/Lib/Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="cairo-sharp">
+      <HintPath>$(GamePath)/Lib/cairo-sharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Keep compiled sources out of the "assets" packaging path -->
+  <ItemGroup>
+    <None Include="modinfo.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="assets/**/*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--
+    Packaging: after a build, zip up exactly what a mod needs (modinfo.json, the
+    compiled DLL, and assets) into dist/<ModId>_<ModVersion>.zip. That single zip
+    is what you send to other people or upload to the Mod DB. They drop it into
+    their VintagestoryData/Mods folder; no compiling required on their end.
+
+    Run just this step with:  dotnet build -c Release -t:PackageMod
+    (a normal build also triggers it via the AfterTargets hook below)
+  -->
+  <Target Name="PackageMod" AfterTargets="Build">
+    <PropertyGroup>
+      <DistDir>$(MSBuildProjectDirectory)/dist</DistDir>
+      <StageDir>$(IntermediateOutputPath)modpackage/</StageDir>
+      <ZipPath>$(DistDir)/$(ModId)_$(ModVersion).zip</ZipPath>
+    </PropertyGroup>
+
+    <!-- Start from a clean staging folder so stray files (pdb, deps.json, old zips) never leak in. -->
+    <RemoveDir Directories="$(StageDir)" />
+    <MakeDir Directories="$(StageDir)" />
+    <MakeDir Directories="$(DistDir)" />
+    <Delete Files="$(ZipPath)" />
+
+    <!-- Collect exactly the files the game loads from the build output. -->
+    <ItemGroup>
+      <AssetFiles Include="$(OutputPath)assets/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="$(OutputPath)modinfo.json" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(StageDir)assets/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <ZipDirectory
+      SourceDirectory="$(StageDir)"
+      DestinationFile="$(ZipPath)"
+      Overwrite="true" />
+
+    <Message Importance="high" Text="Packaged mod -&gt; $(ZipPath)" />
+  </Target>
+
+</Project>

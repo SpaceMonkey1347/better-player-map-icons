@@ -1,0 +1,14 @@
+{
+  "type": "code",
+  "modid": "betterplayermapicons",
+  "name": "Better Player Map Icons",
+  "description": "Replaces the player marker on the world map with a larger, brighter, user-selectable icon so players are much easier to spot. Drop your own SVG icons into assets/betterplayermapicons/textures/playericons/ and pick one with /playericon. Client-side only.",
+  "authors": ["You"],
+  "version": "1.0.0",
+  "side": "client",
+  "requiredOnClient": true,
+  "networkVersion": "1.0.0",
+  "dependencies": {
+    "game": ""
+  }
+}
